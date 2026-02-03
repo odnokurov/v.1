@@ -1,3 +1,18 @@
+Vue.component('product-details', {
+    props: {
+        details: {
+            type: Array,
+            default: () => []
+        }
+    },
+    template: `
+    <ul class="product-details-list">
+      <li v-for="(detail, index) in details" :key="index">
+        {{ detail }}
+      </li>
+    </ul>
+  `
+});
 Vue.component('product', {
     props: {
         premium: {
@@ -20,9 +35,7 @@ Vue.component('product', {
             <p v-else-if="inventory <= 10 && inventory > 0">Almost sold out!</p>
             <p v-else-if="!inStock" :class="{nostock: !inStock}">Out of stock</p>
             <p v-else>Out of stock</p>
-            <ul>
-                <li>{{ productDetails }}</li>
-            </ul>
+            <product-details :details="details"></product-details>
             <p>Shipping is {{ shipping }}</p>
             <div
                     class="color-box"
@@ -118,11 +131,6 @@ Vue.component('product', {
                 return 2.99
             }
         },
-        productDetails(){
-            for (detail in this.details) {
-                return this.details[detail];
-            }
-        }
     },
 })
 let app = new Vue({
