@@ -1,7 +1,54 @@
-let product = "Socks";
-let app = new Vue({
-    el: '#app',
-    data: {
+Vue.component('product', {
+    props: {
+        premium: {
+            type: Boolean,
+            required: true
+        }
+    },
+    template: `
+    <div class="product">
+
+        <div class="product-image">
+            <img v-bind:src="image" v-bind:alt="altText" />
+        </div>
+        <div class="product-info">
+            <h1>{{ title }}</h1>
+            <span>{{sale}}</span>
+            <span v-else></span>
+            <p>{{ description }}</p>
+            <p v-if="inventory > 10">In stock</p>
+            <p v-else-if="inventory <= 10 && inventory > 0">Almost sold out!</p>
+            <p v-else-if="!inStock" :class="{nostock: !inStock}">Out of stock</p>
+            <p v-else>Out of stock</p>
+            <ul>
+                <li v-for="detail in details">{{ detail }}</li>
+            </ul>
+            <p>Shipping is {{ shipping }}</p>
+            <div
+                    class="color-box"
+                    v-for="(variant, index) in variants"
+                    :key="variant.variantId"
+                    :style="{ backgroundColor:variant.variantColor }"
+                    @mouseover="updateProduct(index)"
+            ></div>
+            <ul>
+                <li v-for="size in sizes">{{ size }}</li>
+            </ul>
+            <a v-bind:href="link">More products like this</a><br>
+            <div class="cart">
+                <p>Cart({{ cart }})</p>
+            </div>
+            <button
+                    v-on:click="addToCart"
+                    :disabled="!inStock"
+                    :class="{ disabledButton: !inStock }"
+            >
+                Add to cart
+            </button>
+            <button v-on:click="removeFromCart">Remove from cart</button>
+        </div>
+    </div> `,
+    data() { return {
         product: "Socks",
         brand: 'Vue Mastery',
         description: "A pair of warm, fuzzy socks",
@@ -30,7 +77,7 @@ let app = new Vue({
         sizes: ['32-34', '36-38', '40-42', '44-46', '48-50', '52-54'],
         cart: 0,
 
-    },
+    }},
     methods: {
         addToCart() {
             this.cart += 1
@@ -63,6 +110,20 @@ let app = new Vue({
         sale(){
             if (this.onSale === true)
             return this.brand + ' sells ' + this.product + ' with 50% discount!';
+        },
+        shipping() {
+            if (this.premium) {
+                return "Free";
+            } else {
+                return 2.99
+            }
         }
+
     },
+})
+let app = new Vue({
+    el: '#app',
+    data: {
+        premium: true
+    }
 })
