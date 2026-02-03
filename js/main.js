@@ -21,7 +21,7 @@ Vue.component('product', {
             <p v-else-if="!inStock" :class="{nostock: !inStock}">Out of stock</p>
             <p v-else>Out of stock</p>
             <ul>
-                <li v-for="detail in details">{{ detail }}</li>
+                <li>{{ productDetails }}</li>
             </ul>
             <p>Shipping is {{ shipping }}</p>
             <div
@@ -117,8 +117,12 @@ Vue.component('product', {
             } else {
                 return 2.99
             }
+        },
+        productDetails(){
+            for (detail in this.details) {
+                return this.details[detail];
+            }
         }
-
     },
 })
 let app = new Vue({
