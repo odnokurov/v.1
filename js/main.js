@@ -2,7 +2,7 @@ Vue.component('product-tabs', {
     props: {
         reviews: {
             type: Array,
-            required: false
+            required: false,
         }
     },
     template: `
@@ -25,7 +25,6 @@ Vue.component('product-tabs', {
          </ul>
        </div>
        <div v-show="selectedTab === 'Make a Review'">
-         <product-review @review-submitted="addReview"></product-review>
        </div>
      </div>
  `,
@@ -77,7 +76,7 @@ Vue.component('product-review', {
     <p>
         Would you recommend this product?
         <div>
-            <input type="radio" id="yes" name="yes" value="yes" checked>
+            <input type="radio" id="yes" name="yes" value="yes">
             <label for="yes">Yes</label>
         </div>
         <div>
@@ -141,7 +140,7 @@ Vue.component('product', {
     props: {
         premium: {
             type: Boolean,
-            required: true
+            required: true,
         }
     },
     template: `
@@ -181,6 +180,7 @@ Vue.component('product', {
            </button>
             <button v-on:click="removeFromCart">-</button>
         </div>
+        <product-tabs :reviews="$root.reviews"></product-tabs>
     </div> `,
     data() { return {
         product: "Socks",
@@ -236,7 +236,7 @@ Vue.component('product', {
         },
         sale(){
             if (this.onSale === true)
-            return this.brand + ' sells ' + this.product + ' with 50% discount!';
+                return this.brand + ' sells ' + this.product + ' with 50% discount!';
         },
         shipping() {
             if (this.premium) {
@@ -251,7 +251,8 @@ let app = new Vue({
     el: '#app',
     data: {
         premium: true,
-        cart: []
+        cart: [],
+        reviews: []
     },
     methods: {
         updateCart(id) {
