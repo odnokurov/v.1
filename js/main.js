@@ -1,3 +1,50 @@
+Vue.component('product-tabs', {
+    props: {
+        reviews: {
+            type: Array,
+            required: false
+        }
+    },
+    template: `
+     <div>   
+       <ul>
+         <span class="tab"
+               :class="{ activeTab: selectedTab === tab }"
+               v-for="(tab, index) in tabs"
+               @click="selectedTab = tab"
+         >{{ tab }}</span>
+       </ul>
+       <div v-show="selectedTab === 'Reviews'">
+         <p v-if="!reviews.length">There are no reviews yet.</p>
+         <ul>
+           <li v-for="review in reviews">
+           <p>{{ review.name }}</p>
+           <p>Rating: {{ review.rating }}</p>
+           <p>{{ review.review }}</p>
+           </li>
+         </ul>
+       </div>
+       <div v-show="selectedTab === 'Make a Review'">
+         <product-review @review-submitted="addReview"></product-review>
+       </div>
+     </div>
+ `,
+    data() {
+        return {
+            tabs: ['Reviews', 'Make a Review'],
+            selectedTab: 'Reviews'
+        }
+    }
+})
+
+let eventBus = new Vue({
+    mounted() {
+        eventBus.$on('review-submitted', productReview => {
+            this.reviews.push(productReview)
+        })
+    }
+})
+
 Vue.component('product-details', {
     props: {
         details: {
@@ -125,9 +172,6 @@ Vue.component('product', {
                 <li v-for="size in sizes">{{ size }}</li>
             </ul>
             <a v-bind:href="link">More products like this</a><br>
-            <div class="cart">
-                <p>Cart({{ cart }})</p>
-            </div>
            <button
                    v-on:click="addToCart"
                    :disabled="!inStock"

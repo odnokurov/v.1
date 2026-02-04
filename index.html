@@ -16,7 +16,12 @@
         <p>Cart({{ cart.length }})</p>
     </div>
     <product :premium="premium" @add-to-cart="updateCart" @remove-from-cart="updateRemove"></product>
-    <product-review @review-submitted="addReview"></product-review>
+    <div>
+        <product-tabs @></product-tabs>
+    </div>
+    <div>
+        <product-review @review-submitted="addReview"></product-review>
+    </div>
 </div>
 </body>
 </html>
