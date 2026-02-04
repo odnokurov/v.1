@@ -2,7 +2,6 @@ Vue.component('product-details', {
     props: {
         details: {
             type: Array,
-            default: () => []
         }
     },
     template: `
@@ -16,11 +15,29 @@ Vue.component('product-details', {
 Vue.component('product-review', {
     template: `
     <form class="review-form" @submit.prevent="onSubmit">
+
+    <p v-if="errors.length">
+     <b>Please correct the following error(s):</b>
+     <ul>
+       <li v-for="error in errors">{{ error }}</li>
+     </ul>
+    </p>
+    
      <p>
        <label for="name">Name:</label>
        <input id="name" v-model="name" placeholder="name">
      </p>
-    
+    <p>
+        Would you recommend this product?
+        <div>
+            <input type="radio" id="yes" name="yes" value="yes" checked>
+            <label for="yes">Yes</label>
+        </div>
+        <div>
+            <input type="radio" id="no" name="no" value="no">
+            <label for="no">No</label>
+        </div>
+    </p>
      <p>
        <label for="review">Review:</label>
        <textarea id="review" v-model="review"></textarea>
@@ -48,19 +65,27 @@ Vue.component('product-review', {
         return {
             name: null,
             review: null,
-            rating: null
+            rating: null,
+            errors: []
         }
     },
     methods:{
         onSubmit() {
-            let productReview = {
-                name: this.name,
-                review: this.review,
-                rating: this.rating
+            if(this.name && this.review && this.rating) {
+                let productReview = {
+                    name: this.name,
+                    review: this.review,
+                    rating: this.rating
+                }
+                this.$emit('review-submitted', productReview)
+                this.name = null
+                this.review = null
+                this.rating = null
+            } else {
+                if(!this.name) this.errors.push("Name required.")
+                if(!this.review) this.errors.push("Review required.")
+                if(!this.rating) this.errors.push("Rating required.")
             }
-            this.name = null
-            this.review = null
-            this.rating = null
         }
     }
 })
@@ -110,7 +135,7 @@ Vue.component('product', {
            >
                Add to cart
            </button>
-            <button v-on:click="removeFromCart">Remove from cart</button>
+            <button v-on:click="removeFromCart">-</button>
         </div>
     </div> `,
     data() { return {
@@ -190,6 +215,9 @@ let app = new Vue({
         },
         updateRemove(id) {
             this.cart.pop(id);
-        }
+        },
+        addReview(productReview) {
+            this.reviews.push(productReview)
+        },
     }
 })
