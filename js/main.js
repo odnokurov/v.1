@@ -30,6 +30,7 @@ Vue.component('product-tabs', {
                             <p>{{ review.name }}</p>
                             <p>Rating: {{ review.rating }}</p>
                             <p>{{ review.review }}</p>
+                            <p>{{ review.recommendation }}</p>
                         </li>
                     </ul>
                 </div>
@@ -87,12 +88,12 @@ Vue.component('product-review', {
     <p>
         Would you recommend this product?
         <div>
-            <input type="radio" id="yes" name="yes" value="yes">
             <label for="yes">Yes</label>
+            <input type="radio" id="yes" name="yes_or_no" value="yes" v-model="recommendation">
         </div>
         <div>
-            <input type="radio" id="no" name="no" value="no">
             <label for="no">No</label>
+            <input type="radio" id="no" name="yes_or_no" value="no" v-model="recommendation">
         </div>
     </p>
      <p>
@@ -120,20 +121,22 @@ Vue.component('product-review', {
  `,
     data() {
         return {
-            name: null,
-            review: null,
+            name: '',
+            review: '',
             rating: null,
+            recommendation: '',
             errors: []
         }
     },
-    methods:{
+    methods: {
         onSubmit() {
             this.errors = [];
-            if (this.name && this.review && this.rating) {
+            if (this.name && this.review && this.rating && this.recommendation) {
                 const productReview = {
                     name: this.name,
                     review: this.review,
                     rating: this.rating,
+                    recommendation: this.recommendation
                 };
                 eventBus.$emit('review-submitted', productReview);
                 this.resetForm();
@@ -142,6 +145,7 @@ Vue.component('product-review', {
                     !this.name && "Name required.",
                     !this.review && "Review required.",
                     !this.rating && "Rating required.",
+                    !this.recommendation && "Recommendation required."
                 ].filter(Boolean));
             }
         },
@@ -149,9 +153,9 @@ Vue.component('product-review', {
             this.name = '';
             this.review = '';
             this.rating = null;
+            this.recommendation = '';
         }
-    }
-})
+}})
 
 Vue.component('product', {
     props: {
@@ -162,7 +166,6 @@ Vue.component('product', {
     },
     template: `
     <div class="product">
-
         <div class="product-image">
             <img v-bind:src="image" v-bind:alt="altText" />
         </div>
@@ -171,12 +174,15 @@ Vue.component('product', {
             <span>{{sale}}</span>
             <span v-else></span>
             <p>{{ description }}</p>
-            <p v-if="inventory > 10">In stock</p>
-            <p v-else-if="inventory <= 10 && inventory > 0">Almost sold out!</p>
-            <p v-else-if="!inStock" :class="{nostock: !inStock}">Out of stock</p>
-            <p v-else>Out of stock</p>
-            <product-details :details="details"></product-details>
-            <p>Shipping is {{ shipping }}</p>
+            <p v-if="variants[selectedVariant].variantQuantity > 10">
+                Plenty in stock
+            </p>
+            <p v-else-if="variants[selectedVariant].variantQuantity > 0">
+                Almost sold out!
+            </p>
+            <p v-else class="nostock">
+                Out of stock
+            </p>
             <div
                     class="color-box"
                     v-for="(variant, index) in variants"
@@ -197,7 +203,7 @@ Vue.component('product', {
            </button>
             <button v-on:click="removeFromCart">-</button>
         </div>
-        <product-tabs :reviews="reviews" :shipping-cost="shipping" :details="details"></product-tabs
+        <product-tabs :reviews="reviews" :shipping-cost="shipping" :details="details"></product-tabs>
     </div> `,
     data() { return {
         product: "Socks",
@@ -254,8 +260,8 @@ Vue.component('product', {
         image() {
             return this.variants[this.selectedVariant].variantImage;
         },
-        inStock(){
-            return this.variants[this.selectedVariant].variantQuantity
+        inStock() {
+            return this.variants[this.selectedVariant].variantQuantity > 0;
         },
         sale(){
             if (this.onSale === true)
