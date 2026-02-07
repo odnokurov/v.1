@@ -27,6 +27,7 @@ Vue.component('product-tabs', {
                     <p v-if="!reviews.length">There are no reviews yet.</p>
                     <ul>
                         <li v-for="review in reviews" :key="review.name">
+                            <p>{{time}}</p>
                             <p>{{ review.name }}</p>
                             <p>Rating: {{ review.rating }}</p>
                             <p>{{ review.review }}</p>
@@ -53,6 +54,11 @@ Vue.component('product-tabs', {
             tabs: ['Reviews', 'Make a Review', 'Shipping', 'Details'],
             selectedTab: 'Reviews'
         }
+    },
+    computed: {
+        time(){
+            return (new Date().toLocaleTimeString())
+        },
     }
 })
 
@@ -174,6 +180,7 @@ Vue.component('product', {
             <span>{{sale}}</span>
             <span v-else></span>
             <p>{{ description }}</p>
+            <p>In storage: {{inventory}}</p>
             <p v-if="variants[selectedVariant].variantQuantity > 10">
                 Plenty in stock
             </p>
@@ -201,7 +208,9 @@ Vue.component('product', {
            >
                Add to cart
            </button>
-            <button v-on:click="removeFromCart">-</button>
+            <button v-on:click="removeFromCart"
+                   :disabled="!inStock"
+                   :class="{ disabledButton: !inStock }">Remove</button>
         </div>
         <product-tabs :reviews="reviews" :shipping-cost="shipping" :details="details"></product-tabs>
     </div> `,
@@ -212,8 +221,6 @@ Vue.component('product', {
         selectedVariant: 0,
         altText: "A pair of socks",
         link: "https://www.amazon.com/s/ref=nb_sb_noss?url=search-alias%3Daps&field-keywords=socks",
-        inStock: true,
-        inventory: 10,
         onSale: true,
         details: ['80% cotton', '20% polyester', 'Gender-neutral'],
         variants: [
@@ -221,13 +228,15 @@ Vue.component('product', {
                 variantId: 2234,
                 variantColor: 'green',
                 variantImage: "./assets/vmSocks-green-onWhite.jpg",
-                variantQuantity: 10
+                variantQuantity: 10,
+                variantInventory: 10,
             },
             {
                 variantId: 2235,
                 variantColor: 'blue',
                 variantImage: "./assets/vmSocks-blue-onWhite.jpg",
-                variantQuantity: 0
+                variantQuantity: 0,
+                variantInventory: 5,
             }
         ],
 
@@ -252,6 +261,9 @@ Vue.component('product', {
         eventBus.$on('review-submitted', productReview => {
             this.reviews.push(productReview)
         })
+        timer = setInterval(() => {
+            time.value = new Date().toLocaleTimeString();
+        }, 1000);
     },
     computed: {
         title() {
@@ -261,11 +273,14 @@ Vue.component('product', {
             return this.variants[this.selectedVariant].variantImage;
         },
         inStock() {
-            return this.variants[this.selectedVariant].variantQuantity > 0;
+            return this.variants[this.selectedVariant].variantQuantity > 0
         },
         sale(){
             if (this.onSale === true)
                 return this.brand + ' sells ' + this.product + ' with 50% discount!';
+        },
+        inventory(){
+          return this.variants[this.selectedVariant].variantInventory;
         },
         shipping() {
             if (this.premium) {
@@ -287,10 +302,7 @@ let app = new Vue({
             this.cart.push(id);
         },
         updateRemove(id) {
-            this.cart.pop(id);
-        },
-        addReview(productReview) {
-            this.reviews.push(productReview)
+            this.cart.pop();
         },
     }
 })
